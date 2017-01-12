@@ -1,0 +1,9 @@
+* taskwarrior2net
+
+  This program reads the output of taskwarrior as standard input and
+  transforms it to a network structure.
+
+** TODO support uda's
+
+   this works similarly to tag and project, but without hierarchies
+   and such.

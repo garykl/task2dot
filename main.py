@@ -17,49 +17,29 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+import json
 
-import extern
-import edges
 import validate
+import edges
+import config
 
 
-inp = extern.interpreteInput(sys.argv[1:])
-filename = inp['filename']
-confKey = inp['conf']
-tagExclude = inp['notags']
+def taskwarrior_json():
+    """
+    read input from taskwarrior via stdin,
+    return list of dictionaries.
+    """
+    taskwarrioroutput = ','.join(sys.stdin.readlines())
+    return json.loads('[' + taskwarrioroutput + "]")
 
-tasks = extern.taskwarriorJSON()
 
-class NodeConfig:
-    def __init__(self):
-        self.tasks = True
-        self.tags = True
-        self.projects = True
-        self.annotations = True
+tasks = taskwarrior_json()
 
-class EdgeConfig:
-    def __init__(self):
-        self.tagVStags = False
-        self.projectVStags = False
+conf = config.Config()
 
-## fine tune node existence and connection creation
-class ExclusionConfig:
-    def __init__(self):
-        self.tags = [] # those nodes are supressed
-        self.projects = []
-        self.taskStatus = ['deleted'] # nodes removed
-        self.taggedTaskStatus = set(['deleted']) # connection between tags and those are supressed
-        self.annotationStatus = ['deleted']
+task_data = validate.TaskwarriorExploit(tasks, conf.excluded)
 
-class Config:
-    def __init__(self):
-        self.nodes = NodeConfig()
-        self.edges = EdgeConfig()
-        self.excluded = ExclusionConfig()
-        self.tagHierarchy = {}
+edges = edges.connector(conf, task_data)
 
-config = Config()
-taskwarriordata = validate.TaskwarriorExploit(tasks, config.excluded)
-edges = edges.connector(config, taskwarriordata)
 for e in edges:
     print(e)
