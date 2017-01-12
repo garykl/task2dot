@@ -98,7 +98,7 @@ def connector(conf, collections):
                     if 'Stopped task' in a['description']:
                         continue
                     res.add(Edge('task2annotation',
-                        Node('annotation', a['entry']),
+                        Node('annotation', a['description']),
                         Node('task', collections.task_dict[task['uuid']])))
         return res
 

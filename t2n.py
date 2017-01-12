@@ -19,9 +19,10 @@
 import sys
 import json
 
-import taskwarrior2net.validate
-import taskwarrior2net.edges
-import taskwarrior2net.config
+import taskwarrior2net.validate as validate
+import taskwarrior2net.edges as edges
+import taskwarrior2net.config as config
+import taskwarrior2net.net2dot as net2dot
 
 
 def taskwarrior_json():
@@ -41,5 +42,13 @@ task_data = validate.TaskwarriorExploit(tasks, conf.excluded)
 
 edges = edges.connector(conf, task_data)
 
-for e in edges:
-    print(e)
+print(net2dot.generate_dot_source(edges,
+    {
+        'tag': {},
+        'task': {},
+        'project': {},
+        'annotation': {}},
+    {
+        'task2tag': {},
+        'task2project': {},
+        'task2annotation': {}}))
