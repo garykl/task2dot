@@ -19,9 +19,9 @@
 import sys
 import json
 
-import validate
-import edges
-import config
+import taskwarrior2net.validate
+import taskwarrior2net.edges
+import taskwarrior2net.config
 
 
 def taskwarrior_json():
