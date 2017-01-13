@@ -48,12 +48,24 @@ class Edge:
 
 
 
-def connector(conf, collections):
+def connector(collections, udas, conf):
     """
     generate data structure containing all data
     that is necessary for feeding the connections
     into the dot program.
+
+    udas is a list UDA types. For each uda, check if there is a value in a task
+    and save it as an edge.
     """
+
+    def taskVSuda(task):
+        res = set()
+        for uda in udas:
+            if uda in task.keys():
+                res.add(Edge('task2{0}'.format(uda),
+                    Node('task', task['description']),
+                    Node(uda, task[uda])))
+        return res
 
     def taskVStask(task, uuids):
         res = set()
@@ -172,6 +184,8 @@ def connector(conf, collections):
 
         if conf.edges.tagVStags:
             res.update(tagVStags(t))
+
+        res.update(taskVSuda(t))
 
     res.update(tagHierarchy(conf.tagHierarchy, collections.tags))
 

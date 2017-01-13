@@ -40,15 +40,19 @@ conf = config.Config()
 
 task_data = validate.TaskwarriorExploit(tasks, conf.excluded)
 
-edges = edges.connector(conf, task_data)
+edges = edges.connector(task_data, ['state', 'path'], conf)
 
 print(net2dot.generate_dot_source(edges,
     {
         'tag': {},
         'task': {},
         'project': {},
-        'annotation': {}},
+        'annotation': {},
+        'state': {},
+        'path': {}},
     {
         'task2tag': {},
         'task2project': {},
-        'task2annotation': {}}))
+        'task2annotation': {},
+        'task2state': {},
+        'task2path': {}}))
