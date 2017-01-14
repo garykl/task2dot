@@ -7,3 +7,15 @@
 
    this works similarly to tag and project, but without hierarchies
    and such.
+
+** options
+
+   There are two kinds of options. First, the network structure may be
+   modified by the exclusion of a certain type of node or a special
+   node.
+   
+   For example, every argument =-$something= leads to the exclusion of
+   that tag, or project or whatever =$something= ist.
+
+   And also =--$other= leads to the exclusion of all nodes or edges of
+   type =$other=.

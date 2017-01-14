@@ -42,11 +42,11 @@ class Annotation(object):
 
 class TaskwarriorExploit(object):
 
-    def __init__(self, tasks, excluded):
+    def __init__(self, tasks):
         self.tasks = tasks
-        self.projects = excludeElementsFrom(excluded.projects, self.projects())
-        self.tags = excludeElementsFrom(excluded.tags, self.tags())
-        self.annotations = self.annotations(excluded.annotationStatus)
+        self.projects = self.projects()
+        self.tags = self.tags()
+        self.annotations = self.annotations()
         self.task_dict = self.uuids()
         self.uuids = self.task_dict.keys()
 
@@ -77,10 +77,10 @@ class TaskwarriorExploit(object):
             res[task['uuid']] = task['description']
         return res
 
-    def annotations(self, excludedAnnotationStatus):
+    def annotations(self):
         res = []
         for task in self.tasks:
-            if 'annotations' in task and task['status'] not in excludedAnnotationStatus:
+            if 'annotations' in task and task['status'] is not 'deleted':
                 for a in task['annotations']:
                     if 'Started task' in a['description']:
                         continue

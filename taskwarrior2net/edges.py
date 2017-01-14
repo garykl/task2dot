@@ -48,7 +48,7 @@ class Edge:
 
 
 
-def connector(collections, udas, conf):
+def connector(collections, udas):
     """
     generate data structure containing all data
     that is necessary for feeding the connections
@@ -62,9 +62,10 @@ def connector(collections, udas, conf):
         res = set()
         for uda in udas:
             if uda in task.keys():
-                res.add(Edge('task2{0}'.format(uda),
-                    Node('task', task['description']),
-                    Node(uda, task[uda])))
+                for u in task[uda].split(','):
+                    res.add(Edge('task2{0}'.format(uda),
+                        Node('task', task['description']),
+                        Node(uda, u)))
         return res
 
     def taskVStask(task, uuids):
@@ -74,7 +75,7 @@ def connector(collections, udas, conf):
                 for dep in task['depends'].split(','):
                     if dep in uuids:
                         res.add(Edge('task2task',
-                            Node('task', collections.task_dict(dep)),
+                            Node('task', collections.task_dict[dep]),
                             Node('task', collections.task_dict[task['uuid']])))
         return res
 
@@ -102,7 +103,7 @@ def connector(collections, udas, conf):
 
     def taskVSannotations(task):
         res = set()
-        if task['status'] not in conf.excluded.annotationStatus:
+        if task['status'] is not 'deleted':
             if 'annotations' in task:
                 for a in task['annotations']:
                     if 'Started task' in a['description']:
@@ -145,48 +146,23 @@ def connector(collections, udas, conf):
         for p1 in collections.projects:
             for p2 in collections.projects:
                 cond = p1 in p2 and p1 != p2
-                cond = cond and p1 not in conf.excluded.projects
-                cond = cond and p2 not in conf.excluded.projects
                 if cond:
                     res.add(Edge('project2project',
                         Node('project', p2),
                         Node('project', p1)))
         return res
 
-    def tagHierarchy(tagHierarchy, tags):
-        res = set()
-        hitags = tagHierarchy.keys()
-        for t1 in tagHierarchy:
-            for t2 in tagHierarchy[t1]:
-                if t2 in tags or t2 in hitags:
-                    res.add(Edge('tag2tag',
-                        Node('tag', t1),
-                        Node('tag', t2)))
-        return res
 
     res = set()
-    if conf.nodes.projects:
-        res.update(projectVSprojects())
+    res.update(projectVSprojects())
 
     for t in collections.tasks:
-
-        if conf.nodes.tasks:
-            res.update(taskVStask(t, collections.uuids))
-            if conf.nodes.tags:
-                res.update(taskVStags(t, collections.tags, conf.excluded.taggedTaskStatus))
-            if conf.nodes.projects:
-                res.update(taskVSprojects(t, conf.excluded.taskStatus))
-            if conf.nodes.annotations:
-                res.update(taskVSannotations(t))
-
-        if conf.edges.projectVStags:
-            res.update(projectVStags(t))
-
-        if conf.edges.tagVStags:
-            res.update(tagVStags(t))
-
+        res.update(taskVStask(t, collections.uuids))
+        res.update(taskVStags(t, collections.tags, ['deleted']))
+        res.update(taskVSprojects(t, ['delted']))
+        res.update(taskVSannotations(t))
+        res.update(projectVStags(t))
+        res.update(tagVStags(t))
         res.update(taskVSuda(t))
-
-    res.update(tagHierarchy(conf.tagHierarchy, collections.tags))
 
     return res
