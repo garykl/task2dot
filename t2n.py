@@ -77,7 +77,7 @@ def filter_edges(es, edge_types):
             continue
         if e.node2.kind in edge_types:
             continue
-        if e.kind in edge_types:
+        if e.node1.kind + '-' + e.node2.kind in edge_types:
             continue
         res.add(e)
     return res
@@ -94,27 +94,99 @@ task_data = validate.TaskwarriorExploit(tasks)
 
 (n, et) = exclusion_from_input()
 edge_data = filter_network(
-        edges.connector(task_data, ['state', 'path', 'people']),
+        edges.connector(task_data, ['people']),
         n, et)
 
 
+node_styles = [
+        {
+            'shape': 'egg',
+            'fillcolor': '#000000',
+            'penwidth': '2pt',
+            'style': 'filled',
+            'fontcolor': 'white',
+            'color': 'white'},
+        {
+            'shape': 'octagon',
+            'style': 'filled',
+            'fillcolor': '#dd9900',
+            'color': 'white'},
+        {
+            'shape': 'diamond',
+            'penwidth': '2pt',
+            'color': '#22ff22',
+            'fontcolor': '#ffffff',
+            'style': 'filled',
+            'fillcolor': '#115500'},
+        {
+            'shape': 'box',
+            'color': 'white',
+            'fontcolor': 'white',
+            'style': 'rounded,filled',
+            'fillcolor': '#222299',
+            'fontsize': '16'},
+        {
+            'shape': 'note',
+            'color': 'white',
+            'fontcolor': 'white',
+            'style': 'filled',
+            'fillcolor': '#111155'},
+        {
+            'shape': 'circle',
+            'color': 'white',
+            'fontcolor': 'white'}]
+
+edge_styles = [
+        {
+            'color': 'white'},
+        {
+            'color': 'white',
+            'style': 'dotted',
+            'penwidth': '8pt',
+            'arrowsize': '0.1'},
+        {
+            'color': '#22ff22',
+            'penwidth': '2pt',
+            'arrowhead': 'odot',
+            'arrowtail': 'odot'},
+        {
+            'color': '#aa2211'}]
+
+graph_styles = {
+        'layout': 'fdp',
+        'splines': 'ortho',
+        'bgcolor': '#111519'}
+
 print(net2dot.generate_dot_source(edge_data,
     {
-        'tag': {},
-        'task': {},
-        'project': {},
-        'annotation': {},
-        'state': {},
-        'path': {},
-        'people': {}},
+        'people': node_styles[1],
+        'tags': node_styles[0],
+        'project': node_styles[2],
+        'task': node_styles[3],
+        'annotation': node_styles[4],
+        'state': node_styles[5],
+        'default': node_styles[3]},
     {
-        'task2tag': {},
-        'task2project': {},
-        'task2annotation': {},
-        'task2state': {},
-        'task2path': {},
-        'task2people': {},
-        'project2project': {},
-        'project2tag': {},
-        'tag2tag': {},
-        'task2task': {}}))
+        'default': edge_styles[0],
+        'task-tags': edge_styles[1],
+        'project-project': edge_styles[2],
+        'task-project': edge_styles[3]}, graph_styles))
+#     {
+#         'tag': {},
+#         'task': {},
+#         'project': {},
+#         'annotation': {},
+#         'state': {},
+#         'path': {},
+#         'people': {}},
+#     {
+#         'task2tag': {},
+#         'task2project': {},
+#         'task2annotation': {},
+#         'task2state': {},
+#         'task2path': {},
+#         'task2people': {},
+#         'project2project': {},
+#         'project2tag': {},
+#         'tag2tag': {},
+#         'task2task': {}}))

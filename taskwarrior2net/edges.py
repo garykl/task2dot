@@ -29,8 +29,7 @@ class Node:
 
 class Edge:
 
-    def __init__(self, kind, n_1, n_2):
-        self.kind = kind
+    def __init__(self, n_1, n_2):
         self.node1 = n_1
         self.node2 = n_2
 
@@ -38,13 +37,10 @@ class Edge:
         return hash(self) == hash(other)
 
     def __hash__(self):
-        return hash(self.kind + str(self.node1) + str(self.node2))
+        return hash(str(self.node1) + str(self.node2))
 
     def __repr__(self):
-        return "Edge('{0}', {1}, {2})".format(self.kind, self.node1, self.node2)
-
-    #def __str__(self):
-        #return repr(self)
+        return "Edge({1}, {2})".format(self.node1, self.node2)
 
 
 
@@ -58,37 +54,38 @@ def connector(collections, udas):
     and save it as an edge.
     """
 
-    def taskVSuda(task):
+    def task2uda(task, uda):
         res = set()
-        for uda in udas:
-            if uda in task.keys():
-                for u in task[uda].split(','):
-                    res.add(Edge('task2{0}'.format(uda),
-                        Node('task', task['description']),
-                        Node(uda, u)))
+        if uda in task.keys():
+            for u in task[uda].split(','):
+                res.add(Edge(
+                    Node('task', task['description']),
+                    Node(uda, u)))
         return res
 
-    def taskVStask(task, uuids):
+
+    def taskVStask(task):
         res = set()
         if task['description']:
             if 'depends' in task:
                 for dep in task['depends'].split(','):
-                    if dep in uuids:
-                        res.add(Edge('task2task',
+                    if dep in collections.uuids:
+                        res.add(Edge(
                             Node('task', collections.task_dict[dep]),
                             Node('task', collections.task_dict[task['uuid']])))
         return res
 
-    def taskVStags(task, tags, excludedTaggedTaskStatus):
+
+    def task2list(task, uda):
         res = set()
-        if task['description']:
-            if 'tags' in task.keys():
-                for tag in task['tags']:
-                    if tag in tags and not task['status'] in excludedTaggedTaskStatus:
-                        res.add(Edge('task2tag',
-                            Node('tag', tag),
-                            Node('task', collections.task_dict[task['uuid']])))
+        for tag in task['tags']:
+            if not task['status'] is 'deleted':
+                for elem in task[uda]:
+                    res.add(Edge(
+                        Node('task', task['description']),
+                        Node(uda, elem)))
         return res
+
 
     def taskVSprojects(task, excludedTaskStatus):
         res = set()
@@ -96,47 +93,11 @@ def connector(collections, udas):
             if 'project' in task.keys():
                 if task['project'] in collections.projects:
                     if not task['status'] in excludedTaskStatus:
-                        res.add(Edge('task2project',
+                        res.add(Edge(
                             Node('task', collections.task_dict[task['uuid']]),
                             Node('project', task['project'])))
         return res
 
-    def taskVSannotations(task):
-        res = set()
-        if task['status'] is not 'deleted':
-            if 'annotations' in task:
-                for a in task['annotations']:
-                    if 'Started task' in a['description']:
-                        continue
-                    if 'Stopped task' in a['description']:
-                        continue
-                    res.add(Edge('task2annotation',
-                        Node('annotation', a['description']),
-                        Node('task', collections.task_dict[task['uuid']])))
-        return res
-
-    def projectVStags(task):
-        res = set()
-        if 'project' in task:
-            if task['project'] in collections.projects:
-                if 'tags' in task:
-                    for t in task['tags']:
-                        if t in collections.tags:
-                            res.add(Edge('project2tag',
-                                Node('tag', t),
-                                Node('project', task['project'])))
-        return res
-
-    def tagVStags(task):
-        res = set()
-        if 'tags' in task:
-            for t1 in task['tags']:
-                for t2 in task['tags']:
-                    if t1 != t2:
-                        res.add(Edge('tag2tag',
-                            Node('tag', t1),
-                            Node('tag', t2)))
-        return res
 
     def projectVSprojects():
         """
@@ -147,7 +108,7 @@ def connector(collections, udas):
             for p2 in collections.projects:
                 cond = p1 in p2 and p1 != p2
                 if cond:
-                    res.add(Edge('project2project',
+                    res.add(Edge(
                         Node('project', p2),
                         Node('project', p1)))
         return res
@@ -157,12 +118,19 @@ def connector(collections, udas):
     res.update(projectVSprojects())
 
     for t in collections.tasks:
-        res.update(taskVStask(t, collections.uuids))
-        res.update(taskVStags(t, collections.tags, ['deleted']))
-        res.update(taskVSprojects(t, ['delted']))
-        res.update(taskVSannotations(t))
-        res.update(projectVStags(t))
-        res.update(tagVStags(t))
-        res.update(taskVSuda(t))
+
+        res.update(taskVStask(t))
+        res.update(task2list(t, 'tags'))
+        res.update(task2uda(t, 'project'))
+
+        for u in udas:
+            res.update(task2uda(t, u))
 
     return res
+
+
+def add_indirect_edges(edges, kind_1, kind_2):
+    """
+    If a node has a connection to
+    """
+    pass

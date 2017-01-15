@@ -20,7 +20,7 @@ import taskwarrior2net.edges as edges
 
 
 def generate_dot_source(
-        connections, node_conf, edge_conf):
+        connections, node_conf, edge_conf, graph_conf):
     """
     node_conf is a disctionary with keys being a possible type of a node.
     edge_conf is a dictionary with keys being a possible type of an edge.
@@ -30,15 +30,11 @@ def generate_dot_source(
 
     header = "digraph  dependencies {"
 
-    graph_conf = {
-            'layout': 'fdp',
-            'splines': 'true'}
-
     for (key, value) in graph_conf.items():
-        header += "{0}={1}; ".format(key, value)
+        header += "{0}=\"{1}\"; ".format(key, value)
     footer = "}"
 
-    chars_per_line = 30
+    chars_per_line = 20
     def wrap_text(strng):
         lines = textwrap.wrap(strng, width=chars_per_line)
         return '"' + "\\n".join(lines) + '"'
@@ -46,8 +42,13 @@ def generate_dot_source(
 
     def node(n):
         label = wrap_text(n.label)
-        label += "".join(["[{0}={1}]".format(k, v) for
-            (k, v) in node_conf[n.kind]])
+        label += '[id="activate(\'{0}\', \'{1}\')"]'.format(n.kind, n.label)
+        if n.kind in node_conf:
+            label += "".join(["[{0}=\"{1}\"]".format(k, v) for
+                (k, v) in node_conf[n.kind].items()])
+        else:
+            label += "".join(["[{0}=\"{1}\"]".format(k, v) for
+                (k, v) in node_conf['default'].items()])
         return label
 
 
@@ -55,8 +56,13 @@ def generate_dot_source(
         line = '{0} -> {1}'.format(
                 wrap_text(e.node1.label),
                 wrap_text(e.node2.label))
-        line += "".join(["[{0}={1}]".format(k, v) for
-            (k, v) in edge_conf[e.kind]])
+        kind = e.node1.kind + '-' + e.node2.kind
+        if kind in edge_conf:
+            line += "".join(["[{0}=\"{1}\"]".format(k, v) for
+                (k, v) in edge_conf[kind].items()])
+        else:
+            line += "".join(["[{0}=\"{1}\"]".format(k, v) for
+                (k, v) in edge_conf['default'].items()])
         return line
 
     res = [header]

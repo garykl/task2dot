@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>graphviz interaction</title>
+  </head>
+  <body>
+
+    <h2 id='test'>graphviz interaction</h2>
+
+    <div id='test_ground'>
+    </div>
+
+  </body>
+
+  <script type='text/javascript'>
+
+var activate = function (kind, label) {
+
+  xhttp = new XMLHttpRequest()
+  xhttp.onreadystatechange = function() {
+
+    if (this.readyState == 4 && this.status == 200) {
+
+      document.getElementById('test_ground').innerHTML = this.responseText;
+      console.log(this.responseText);
+      var nodes = document.querySelectorAll('.node');
+      for (var i=0; i<nodes.length; i++) {
+          nodes[i].onclick = (function (ii) {
+              return function () {
+                  eval(nodes[ii].id);
+              };
+          })(i);
+      }
+    }
+  };
+
+  url =  "http://localhost:8000/aenden.html?kind=" + kind;
+  url += "&label=" + label;
+  xhttp.open("GET", url, true);
+  xhttp.send();
+
+}
+
+
+window.onload = function () {
+  activate('tags', 'mpi');
+}
+
+  </script>
+
+</html>
