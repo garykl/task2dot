@@ -94,7 +94,7 @@ task_data = validate.TaskwarriorExploit(tasks)
 
 (n, et) = exclusion_from_input()
 edge_data = filter_network(
-        edges.connector(task_data, ['people']),
+        edges.connector(task_data, ['people', 'outcome']),
         n, et)
 
 
@@ -161,6 +161,7 @@ print(net2dot.generate_dot_source(edge_data,
     {
         'people': node_styles[1],
         'tags': node_styles[0],
+        'outcome': node_styles[0],
         'project': node_styles[2],
         'task': node_styles[3],
         'annotation': node_styles[4],
