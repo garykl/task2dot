@@ -131,6 +131,42 @@ def connector(collections, udas):
     return res
 
 
+def filter_nodes(es, nodes):
+    """
+    return edges from es that do not contain nodes from 'nodes'.
+    """
+    res = set()
+    for e in es:
+        if e.node1.label in nodes:
+            continue
+        if e.node2.label in nodes:
+            continue
+        res.add(e)
+    return res
+
+
+def filter_edges(es, edge_types):
+    """
+    return edges from es that are not of a type in edge_types and do not contain
+    any nodes of that type.
+    """
+    res = set()
+    for e in es:
+        if e.node1.kind in edge_types:
+            continue
+        if e.node2.kind in edge_types:
+            continue
+        if e.node1.kind + '-' + e.node2.kind in edge_types:
+            continue
+        res.add(e)
+    return res
+
+
+def filter_network(es, nodes, edge_types):
+    h = filter_nodes(es, nodes)
+    return filter_edges(h, edge_types)
+
+
 def add_indirect_edges(edges, kind_1, kind_2):
     """
     If a node has a connection to

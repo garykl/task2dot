@@ -26,6 +26,7 @@
 #
 ################################################################################
 import sys
+import os
 import json
 
 import taskwarrior2net.validate as validate
@@ -33,7 +34,7 @@ import taskwarrior2net.edges as edges
 import taskwarrior2net.net2dot as net2dot
 
 
-def taskwarrior_json():
+def json_from_task_process():
     """
     read input from taskwarrior via stdin,
     return list of dictionaries.
@@ -42,7 +43,7 @@ def taskwarrior_json():
     return json.loads('[' + taskwarrioroutput + "]")
 
 
-def exclusion_from_input():
+def exclusion_from_command_line():
     """
     read command line arguments, return exclusion pattern.
     """
@@ -52,49 +53,34 @@ def exclusion_from_input():
     return (node_exclusion, edge_exclusion)
 
 
-def filter_nodes(es, nodes):
+
+def get_udas_from_task_config():
     """
-    return edges from es that do not contain nodes from 'nodes'.
+    read udas from configuration file.
     """
-    res = set()
-    for e in es:
-        if e.node1.label in nodes:
-            continue
-        if e.node2.label in nodes:
-            continue
-        res.add(e)
-    return res
+    udas = set()
+
+    if os.environ.get('TASKRC') is None:
+        config_file = '{0}/.taskrc'.format(os.environ['HOME'])
+    else:
+        config_file = '{0}/.taskrc'.format(os.environ['TASKRC'])
+
+    with open(config_file, 'r') as rc:
+
+        lines = [line for line in rc.readlines() if 'uda' == line[:3]]
+        for line in lines:
+            udas.add(line.split('.')[1])
+
+    return udas
 
 
-def filter_edges(es, edge_types):
-    """
-    return edges from es that are not of a type in edge_types and do not contain
-    any nodes of that type.
-    """
-    res = set()
-    for e in es:
-        if e.node1.kind in edge_types:
-            continue
-        if e.node2.kind in edge_types:
-            continue
-        if e.node1.kind + '-' + e.node2.kind in edge_types:
-            continue
-        res.add(e)
-    return res
-
-
-def filter_network(es, nodes, edge_types):
-    h = filter_nodes(es, nodes)
-    return filter_edges(h, edge_types)
-
-
-tasks = taskwarrior_json()
+tasks = json_from_task_process()
 
 task_data = validate.TaskwarriorExploit(tasks)
 
-(n, et) = exclusion_from_input()
-edge_data = filter_network(
-        edges.connector(task_data, ['people', 'outcome']),
+(n, et) = exclusion_from_command_line()
+edge_data = edges.filter_network(
+        edges.connector(task_data, get_udas_from_task_config()),
         n, et)
 
 
