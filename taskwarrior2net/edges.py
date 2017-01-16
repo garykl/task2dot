@@ -54,6 +54,8 @@ def connector(collections, udas):
     and save it as an edge.
     """
 
+
+
     def task2uda(task, uda):
         res = set()
         if uda in task.keys():
@@ -71,8 +73,8 @@ def connector(collections, udas):
                 for dep in task['depends'].split(','):
                     if dep in collections.uuids:
                         res.add(Edge(
-                            Node('task', collections.task_dict[dep]),
-                            Node('task', collections.task_dict[task['uuid']])))
+                            Node('task', collections.task_dict[dep]['description']),
+                            Node('task', task['description'])))
         return res
 
 
@@ -94,7 +96,7 @@ def connector(collections, udas):
                 if task['project'] in collections.projects:
                     if not task['status'] in excludedTaskStatus:
                         res.add(Edge(
-                            Node('task', collections.task_dict[task['uuid']]),
+                            Node('task', task['description']),
                             Node('project', task['project'])))
         return res
 

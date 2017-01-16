@@ -34,14 +34,9 @@ def generate_dot_source(
         header += "{0}=\"{1}\"; ".format(key, value)
     footer = "}"
 
-    chars_per_line = 20
-    def wrap_text(strng):
-        lines = textwrap.wrap(strng, width=chars_per_line)
-        return '"' + "\\n".join(lines) + '"'
-
 
     def node(n):
-        label = wrap_text(n.label)
+        label = '"' + n.label + '"'
         label += '[id="activate(\'{0}\', \'{1}\')"]'.format(n.kind, n.label)
         if n.kind in node_conf:
             label += "".join(["[{0}=\"{1}\"]".format(k, v) for
@@ -53,9 +48,9 @@ def generate_dot_source(
 
 
     def edge(e):
-        line = '{0} -> {1}'.format(
-                wrap_text(e.node1.label),
-                wrap_text(e.node2.label))
+        line = '"{0}" -> "{1}"'.format(
+                e.node1.label,
+                e.node2.label)
         kind = e.node1.kind + '-' + e.node2.kind
         if kind in edge_conf:
             line += "".join(["[{0}=\"{1}\"]".format(k, v) for

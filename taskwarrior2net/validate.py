@@ -1,3 +1,6 @@
+import textwrap
+
+
 def excludeElementsFrom(toExclude, ll):
     """
     toExclude and ll are lists of elements.
@@ -40,15 +43,32 @@ class Annotation(object):
         self.description = description
 
 
+
+def task_with_annotations(task):
+
+    def wrap_text(strng, chars_per_line=25):
+        lines = textwrap.wrap(strng, width=chars_per_line)
+        return "\\n".join(lines)
+
+    res = wrap_text(task['description'], chars_per_line=25) + '\n'
+    if 'annotations' in task:
+        for anno in task['annotations']:
+            res += anno['entry'] +':\n'
+            res += wrap_text(anno['description'], chars_per_line=20) + '\n'
+    return res
+
+
 class TaskwarriorExploit(object):
 
     def __init__(self, tasks):
         self.tasks = tasks
+        for t in tasks:
+            t['description'] = task_with_annotations(t)
         self.projects = self.projects()
         self.tags = self.tags()
-        self.annotations = self.annotations()
         self.task_dict = self.uuids()
         self.uuids = self.task_dict.keys()
+
 
     def projects(self):
         res = set()
@@ -74,7 +94,7 @@ class TaskwarriorExploit(object):
     def uuids(self):
         res = {}
         for task in self.tasks:
-            res[task['uuid']] = task['description']
+            res[task['uuid']] = task
         return res
 
     def annotations(self):
