@@ -42,6 +42,8 @@ class Edge:
     def __repr__(self):
         return "Edge({1}, {2})".format(self.node1, self.node2)
 
+    def kind(self):
+        return self.node1 + '-' + self.node2
 
 
 def connector(collections, udas):
@@ -171,4 +173,18 @@ def add_indirect_edges(edges, kind_1, kind_2):
     """
     If a node has a connection to
     """
-    pass
+    res = set()
+
+    for e_1 in edges:
+        for e_2 in edges:
+
+            if e_1.node1.kind == kind_1 and e_2.node1.kind == kind_2:
+                res.add(Edge(e_1.node1, e_2.node1))
+            if e_1.node1.kind == kind_1 and e_2.node2.kind == kind_2:
+                res.add(Edge(e_1.node1, e_2.node2))
+            if e_1.node2.kind == kind_1 and e_2.node1.kind == kind_2:
+                res.add(Edge(e_1.node2, e_2.node1))
+            if e_1.node2.kind == kind_1 and e_2.node2.kind == kind_2:
+                res.add(Edge(e_1.node2, e_2.node2))
+
+    return res
