@@ -172,22 +172,3 @@ print(net2dot.generate_dot_source(edge_data,
         'task-tags': edge_styles[1],
         'project-project': edge_styles[2],
         'task-project': edge_styles[3]}, graph_styles))
-#     {
-#         'tag': {},
-#         'task': {},
-#         'project': {},
-#         'annotation': {},
-#         'state': {},
-#         'path': {},
-#         'people': {}},
-#     {
-#         'task2tag': {},
-#         'task2project': {},
-#         'task2annotation': {},
-#         'task2state': {},
-#         'task2path': {},
-#         'task2people': {},
-#         'project2project': {},
-#         'project2tag': {},
-#         'tag2tag': {},
-#         'task2task': {}}))
