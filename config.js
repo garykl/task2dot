@@ -1,0 +1,2 @@
+var tags = ['analyse', 'biology', 'configure', 'creative', 'debug', 'design', 'figure', 'flow', 'game', 'gregor', 'habit', 'health', 'idea', 'jules', 'klettern', 'mail', 'marko', 'movie', 'mpi', 'music', 'next', 'nocal', 'nocolor', 'nonag', 'orga', 'private', 'sustainability', 'synchronization', 'tobi', 'urlaub', 'write'];
+var projects = ['dotwarrior', 'familie', 'finance', 'paper', 'paper.som', 'thesis', 'thesis.forcevelocity', 'thesis.noise', 'thesis.synchronization'];

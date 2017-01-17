@@ -82,12 +82,13 @@ def connector(collections, udas):
 
     def task2list(task, uda):
         res = set()
-        for tag in task['tags']:
-            if not task['status'] is 'deleted':
-                for elem in task[uda]:
-                    res.add(Edge(
-                        Node('task', task['description']),
-                        Node(uda, elem)))
+        if 'tags' in task:
+            for tag in task['tags']:
+                if not task['status'] is 'deleted':
+                    for elem in task[uda]:
+                        res.add(Edge(
+                            Node('task', task['description']),
+                            Node(uda, elem)))
         return res
 
 

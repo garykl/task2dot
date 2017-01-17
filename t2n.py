@@ -80,12 +80,12 @@ task_data = validate.TaskwarriorExploit(tasks)
 
 (nodes_to_be_excluded, edges_to_be_excluded) = exclusion_from_command_line()
 edge_data = edges.connector(task_data, get_udas_from_task_config())
-p_t_edges = edges.add_indirect_edges(edge_data, 'project', 'tags')
-p_p_edges = edges.add_indirect_edges(edge_data, 'project', 'people')
+#p_t_edges = edges.add_indirect_edges(edge_data, 'project', 'tags')
+#p_p_edges = edges.add_indirect_edges(edge_data, 'project', 'people')
 edge_data = edges.filter_network(
         edge_data, nodes_to_be_excluded, edges_to_be_excluded)
-edge_data.update(p_t_edges)
-edge_data.update(p_p_edges)
+#edge_data.update(p_t_edges)
+#edge_data.update(p_p_edges)
 
 
 
@@ -146,6 +146,7 @@ edge_styles = [
 graph_styles = {
         'layout': 'fdp',
         'splines': 'ortho',
+        'size': '30,30',
         'bgcolor': '#111519'}
 
 print(net2dot.generate_dot_source(edge_data,

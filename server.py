@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import urllib.parse
 from wsgiref.simple_server import make_server
 
 
@@ -29,22 +30,12 @@ def extract_data_from_query(query):
 
 
 
-def generate_net(kind, label):
-
-    command = None
-
-    if kind == 'tags':
-        command = 'task +' + label + ' status:pending export |'
-        command += ' python3 t2n.py -todo -' + label
-        command += ' | dot -Tsvg > test_raw.svg'
-
-    if kind == 'project':
-        command = 'task project:' + label + ' status:pending export |'
-        command += ' python3 t2n.py -todo -' + label
-        command += ' | dot -Tsvg > test_raw.svg'
-
-    if command is not None:
-        os.system(command)
+def generate_net(query):
+    command = urllib.parse.unquote(query)
+    command += ' | dot -Tsvg | '
+    command += 'sed -E \'s/<svg width="[0-9]+pt" height="[0-9]+pt"/'
+    command += '<svg width="500" height="500"/\' > test_raw.svg'
+    os.system(command)
 
 
 def app(environ, start_response):
@@ -55,7 +46,7 @@ def app(environ, start_response):
 
         query = environ['QUERY_STRING']
         request = extract_data_from_query(query)
-        generate_net(request['kind'], request['label'])
+        generate_net(request['query'])
 
         start_response("200 OK", [
             ("content-type", "image/svg"),
@@ -69,6 +60,21 @@ def app(environ, start_response):
 
 
 if __name__ == '__main__':
+
+    import subprocess
+    tags = subprocess.check_output(
+        ['task', '_tags']).decode('utf-8').split('\n')[:-1]
+    projects = subprocess.check_output(
+        ['task', '_projects']).decode('utf-8').split('\n')[:-1]
+    with open('config.js', 'w') as js_handle:
+        js_handle.write('var tags = ')
+        js_handle.write(repr(tags))
+        js_handle.write(';')
+        js_handle.write('\n')
+        js_handle.write('var projects = ')
+        js_handle.write(repr(projects))
+        js_handle.write(';')
+
     port = 8000
     httpd = make_server("", port, app)
     httpd.serve_forever()
