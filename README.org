@@ -90,20 +90,13 @@
 
 ** more connecgions: over next neighbors
 
-   There are functions =add_indirect_edges=, which add additional
-   connections. One could for example add edges between projects and
-   tags because they are connected by tasks that have both. If one
-   then remove the tasks one can look at a graph that shows us which
+   It is possible to add additional edges than what taskwarrior export
+   directly. One could for example add edges between projects and tags
+   because they are connected by tasks that have both. If one then
+   remove the tasks one can look at a graph that shows us which
    'actions' are needed for certain projects, if the tags represent
    'actions'. A command line argument interpretation is to be
    followed. I suggest
    #+BEGIN_SRC sh
    task export | python3 dotwarrior.py ++tags-project --task
    #+END_SRC
-
-** outlook
-
-*** visual configuration
-
-    Currently, all the visual configuration is done within the main
-    file =dotwarrior.py=. I'm not sure how that should be changed.
