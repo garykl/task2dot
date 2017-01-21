@@ -50,7 +50,8 @@ def exclusion_from_command_line():
     arguments = sys.argv[1:]
     node_exclusion = [h[1:] for h in arguments if h[0] == '-' and h[1] != '-']
     edge_exclusion = [h[2:] for h in arguments if h[0] == '-' and h[1] == '-']
-    return (node_exclusion, edge_exclusion)
+    edge_addition = [h[2:] for h in arguments if h[0] == '+' and h[1] == '+']
+    return (node_exclusion, edge_exclusion, edge_addition)
 
 
 
@@ -58,14 +59,18 @@ tasks = json_from_task_stdin()
 
 task_data = task_lib.TaskwarriorExploit(tasks)
 
-(nodes_to_be_excluded, edges_to_be_excluded) = exclusion_from_command_line()
+(nodes_to_be_excluded, edges_to_be_excluded, edge_addition) = exclusion_from_command_line()
 edge_data = edges.connector(task_data, task_lib.get_udas_from_task_config())
-#p_t_edges = edges.add_indirect_edges(edge_data, 'project', 'tags')
-#p_p_edges = edges.add_indirect_edges(edge_data, 'project', 'people')
+
+more_edges = set()
+for e_a in edge_addition:
+    [kind_1, kind_2] = e_a.split('-')
+    more_edges.update(edges.add_indirect_edges(edge_data, kind_1, kind_2))
+
 edge_data = edges.filter_network(
         edge_data, nodes_to_be_excluded, edges_to_be_excluded)
-#edge_data.update(p_t_edges)
-#edge_data.update(p_p_edges)
+
+edge_data.update(more_edges)
 
 
 

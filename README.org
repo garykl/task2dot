@@ -1,21 +1,109 @@
-* taskwarrior2net
+* dotwarrior
 
-  This program reads the output of taskwarrior as standard input and
-  transforms it to a network structure.
+  This program helps with the creation of visualizations of todo
+  lists. It works as a simple filter between [[https://github.com/taskwarrior/task][taskwarrior]] and [[http://www.graphviz.org/][graphviz]].
 
-** uda's are supported
+** general usage
 
-   this works similarly to tag and project, but without hierarchies
-   and such.
+   On the command line write
+   #+BEGIN_SRC sh
+   task export | python3 dotwarrior.py | dot -Tsvg > test.svg
+   #+END_SRC
 
-** options
+   With this, all todo items that you have ever created are fed into
+   =dotwarrior=. Without any arguments, it just translates the export
+   into a format that is suitable for =graphviz= whose output is saved
+   in the file =test.svg=. We can expect this to be insanely messy.
 
-   There are two kinds of options. First, the network structure may be
-   modified by the exclusion of a certain type of node or a special
-   node.
-   
-   For example, every argument =-$something= leads to the exclusion of
-   that tag, or project or whatever =$something= ist.
+   For clarity, I will not show the dot command and the output
+   redirection into a file in all the following code snipptes. Note
+   that those have to be added for obtaining useful commands.
 
-   And also =--$other= leads to the exclusion of all nodes or edges of
-   type =$other=.
+   When exporting data from =taskwarrior= one has to explicitely state
+   that one only wants to export pending tasks:
+   #+BEGIN_SRC sh
+   task status:pendung export | python3 dotwarrior.py
+   #+END_SRC
+
+** what are the nodes, what are the edges
+
+   Every task in the taskwarrior export is a node in the dot
+   graph. Also projects and tags are nodes. The projects and the tasks
+   are connected and the tasks are connected with its tags. The
+   dependencies between tasks are shown as well.
+
+   User defined attributes are supported as well. If the task
+   configuration file is =~/.taskrc= or can be found in the environment
+   variable =$TASKRC= then all user defined attributes are shown as node
+   that are connected to its respective tasks. This usually is
+   overkill, which is why there are two mechanisms to exclude nodes
+   and connections from the graph.
+
+** node and edge exclusion
+
+*** node exclusion
+
+    Exclude a specific node write
+    #+BEGIN_SRC sh
+    task status:pending export | python3 dotwarrior.py -node
+    #+END_SRC
+    Then there will be no node with the content 'node' in the output
+    graph.
+
+    So why is this useful? If you try to implement /Kanban/ or something
+    similar you are very likely to have a certain tag or a user
+    defined attribute, like =todo= far too often for having it in a
+    graph visualization. Almost all task are connected to it via
+    edges, which is useless. Also, if you export taskwarrior data,
+    which is filtered with a specific =tag= will cause the resulting
+    graph having a lot of connection to that tag. So the following
+    visulation would be useful:
+    #+BEGIN_SRC sh
+    task status:pending +work | python3 dotwarrior.py -work
+    #+END_SRC
+
+*** node type and edge exclusion
+
+    A specific type of node can be excluded by using two hyphens. For
+    example, not showing any project nodes looks like this:
+    #+BEGIN_SRC sh
+    task status:pendung export | python3 dotwarrior.py --project
+    #+END_SRC
+    Or not showing any tags:
+    #+BEGIN_SRC sh
+    task status:pendung export | python3 dotwarrior.py --tags    
+    #+END_SRC
+
+    In my workflow, paths and emails ids are attached to tasks, so I
+    need to write
+    #+BEGIN_SRC sh
+    task export | python3 dotwarrior.py --path --email
+    #+END_SRC
+
+    It is also possible to exclude certain connection also by using
+    double hyphen. Let's get rid of all connections from tasks to
+    tags:
+    #+BEGIN_SRC sh
+    task export | python3 dotwarrior.py --task-tags
+    #+END_SRC
+
+
+** more connecgions: over next neighbors
+
+   There are functions =add_indirect_edges=, which add additional
+   connections. One could for example add edges between projects and
+   tags because they are connected by tasks that have both. If one
+   then remove the tasks one can look at a graph that shows us which
+   'actions' are needed for certain projects, if the tags represent
+   'actions'. A command line argument interpretation is to be
+   followed. I suggest
+   #+BEGIN_SRC sh
+   task export | python3 dotwarrior.py ++tags-project --task
+   #+END_SRC
+
+** outlook
+
+*** visual configuration
+
+    Currently, all the visual configuration is done within the main
+    file =dotwarrior.py=. I'm not sure how that should be changed.

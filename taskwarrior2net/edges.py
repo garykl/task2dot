@@ -26,6 +26,9 @@ class Node:
     def __repr__(self):
         return "Node('{0}', '{1}')".format(self.kind, self.label)
 
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+
 
 class Edge:
 
@@ -40,7 +43,7 @@ class Edge:
         return hash(str(self.node1) + str(self.node2))
 
     def __repr__(self):
-        return "Edge({1}, {2})".format(self.node1, self.node2)
+        return "Edge({0}, {1})".format(self.node1, self.node2)
 
     def kind(self):
         return self.node1 + '-' + self.node2
@@ -68,7 +71,7 @@ def connector(collections, udas):
         return res
 
 
-    def taskVStask(task):
+    def task2task(task):
         res = set()
         if task['description']:
             if 'depends' in task:
@@ -80,19 +83,18 @@ def connector(collections, udas):
         return res
 
 
-    def task2list(task, uda):
+    def task2tags(task):
         res = set()
         if 'tags' in task:
             for tag in task['tags']:
                 if not task['status'] is 'deleted':
-                    for elem in task[uda]:
-                        res.add(Edge(
-                            Node('task', task['description']),
-                            Node(uda, elem)))
+                    res.add(Edge(
+                        Node('task', task['description']),
+                        Node('tags', tag)))
         return res
 
 
-    def taskVSprojects(task, excludedTaskStatus):
+    def task2projects(task, excludedTaskStatus):
         res = set()
         if task['description']:
             if 'project' in task.keys():
@@ -104,7 +106,7 @@ def connector(collections, udas):
         return res
 
 
-    def projectVSprojects():
+    def project2projects():
         """
         let's support subprojects.
         """
@@ -120,12 +122,12 @@ def connector(collections, udas):
 
 
     res = set()
-    res.update(projectVSprojects())
+    res.update(project2projects())
 
     for t in collections.tasks:
 
-        res.update(taskVStask(t))
-        res.update(task2list(t, 'tags'))
+        res.update(task2task(t))
+        res.update(task2tags(t))
         res.update(task2uda(t, 'project'))
 
         for u in udas:
@@ -176,16 +178,21 @@ def add_indirect_edges(edges, kind_1, kind_2):
     """
     res = set()
 
+    import sys
     for e_1 in edges:
         for e_2 in edges:
 
             if e_1.node1.kind == kind_1 and e_2.node1.kind == kind_2:
-                res.add(Edge(e_1.node1, e_2.node1))
+                if e_1.node2 == e_2.node2:
+                    res.add(Edge(e_1.node1, e_2.node1))
             if e_1.node1.kind == kind_1 and e_2.node2.kind == kind_2:
-                res.add(Edge(e_1.node1, e_2.node2))
+                if e_1.node2 == e_2.node1:
+                    res.add(Edge(e_1.node1, e_2.node2))
             if e_1.node2.kind == kind_1 and e_2.node1.kind == kind_2:
-                res.add(Edge(e_1.node2, e_2.node1))
+                if e_1.node1 == e_2.node2:
+                    res.add(Edge(e_1.node2, e_2.node1))
             if e_1.node2.kind == kind_1 and e_2.node2.kind == kind_2:
-                res.add(Edge(e_1.node2, e_2.node2))
+                if e_1.node1 == e_2.node1:
+                    res.add(Edge(e_1.node2, e_2.node2))
 
     return res
