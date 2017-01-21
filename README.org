@@ -1,4 +1,4 @@
-* dotwarrior
+* task2dot
 
   This program helps with the creation of visualizations of todo
   lists. It works as a simple filter between [[https://github.com/taskwarrior/task][taskwarrior]] and [[http://www.graphviz.org/][graphviz]].
@@ -7,11 +7,11 @@
 
    On the command line write
    #+BEGIN_SRC sh
-   task export | python3 dotwarrior.py | dot -Tsvg > test.svg
+   task export | python3 task2dot.py | dot -Tsvg > test.svg
    #+END_SRC
 
    With this, all todo items that you have ever created are fed into
-   =dotwarrior=. Without any arguments, it just translates the export
+   =task2dot=. Without any arguments, it just translates the export
    into a format that is suitable for =graphviz= whose output is saved
    in the file =test.svg=. We can expect this to be insanely messy.
 
@@ -22,7 +22,7 @@
    When exporting data from =taskwarrior= one has to explicitely state
    that one only wants to export pending tasks:
    #+BEGIN_SRC sh
-   task status:pendung export | python3 dotwarrior.py
+   task status:pendung export | python3 task2dot.py
    #+END_SRC
 
 ** what are the nodes, what are the edges
@@ -45,7 +45,7 @@
 
     Exclude a specific node write
     #+BEGIN_SRC sh
-    task status:pending export | python3 dotwarrior.py -node
+    task status:pending export | python3 task2dot.py -node
     #+END_SRC
     Then there will be no node with the content 'node' in the output
     graph.
@@ -59,7 +59,7 @@
     graph having a lot of connection to that tag. So the following
     visulation would be useful:
     #+BEGIN_SRC sh
-    task status:pending +work | python3 dotwarrior.py -work
+    task status:pending +work | python3 task2dot.py -work
     #+END_SRC
 
 *** node type and edge exclusion
@@ -67,24 +67,24 @@
     A specific type of node can be excluded by using two hyphens. For
     example, not showing any project nodes looks like this:
     #+BEGIN_SRC sh
-    task status:pendung export | python3 dotwarrior.py --project
+    task status:pendung export | python3 task2dot.py --project
     #+END_SRC
     Or not showing any tags:
     #+BEGIN_SRC sh
-    task status:pendung export | python3 dotwarrior.py --tags    
+    task status:pendung export | python3 task2dot.py --tags    
     #+END_SRC
 
     In my workflow, paths and emails ids are attached to tasks, so I
     need to write
     #+BEGIN_SRC sh
-    task export | python3 dotwarrior.py --path --email
+    task export | python3 task2dot.py --path --email
     #+END_SRC
 
     It is also possible to exclude certain connection also by using
     double hyphen. Let's get rid of all connections from tasks to
     tags:
     #+BEGIN_SRC sh
-    task export | python3 dotwarrior.py --task-tags
+    task export | python3 task2dot.py --task-tags
     #+END_SRC
 
 
@@ -98,5 +98,5 @@
    'actions'. A command line argument interpretation is to be
    followed. I suggest
    #+BEGIN_SRC sh
-   task export | python3 dotwarrior.py ++tags-project --task
+   task export | python3 task2dot.py ++tags-project --task
    #+END_SRC
