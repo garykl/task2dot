@@ -1,4 +1,53 @@
+import os
+import subprocess
 import textwrap
+import json
+
+
+
+def json_from_task_process(task_query):
+    """
+    read input from taskwarrior via stdin,
+    return list of dictionaries.
+    """
+    output = subprocess.check_output(task_query.split(' '))
+    tasks = ','.join(str(output, 'utf-8').split('\n')[:-1])
+    return json.loads('[' + tasks + "]")
+
+
+def get_udas_from_task_config():
+    """
+    read udas from configuration file.
+    """
+    udas = set()
+
+    if os.environ.get('TASKRC') is None:
+        config_file = '{0}/.taskrc'.format(os.environ['HOME'])
+    else:
+        config_file = '{0}/.taskrc'.format(os.environ['TASKRC'])
+
+    with open(config_file, 'r') as rc:
+
+        lines = [line for line in rc.readlines() if 'uda' == line[:3]]
+        for line in lines:
+            udas.add(line.split('.')[1])
+
+    return udas
+
+
+def get_uda_values_from_tasks(tasks, uda):
+    res = set()
+    for task in tasks:
+        if uda in task:
+            res.add(task[uda])
+    return res
+
+
+def get_udas_from_task_process():
+    udas = get_udas_from_task_config()
+    tasks = json_from_task_process('task status:pending export')
+    return {u: get_uda_values_from_tasks(tasks, u)
+            for u in udas}
 
 
 def task_with_annotations(task):
@@ -53,3 +102,9 @@ class TaskwarriorExploit(object):
         for task in self.tasks:
             res[task['uuid']] = task
         return res
+
+
+if __name__ == '__main__':
+
+    print(get_udas_from_task_process())
+

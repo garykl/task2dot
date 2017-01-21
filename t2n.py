@@ -29,12 +29,12 @@ import sys
 import os
 import json
 
-import taskwarrior2net.validate as validate
+import taskwarrior2net.task_lib as task_lib
 import taskwarrior2net.edges as edges
 import taskwarrior2net.net2dot as net2dot
 
 
-def json_from_task_process():
+def json_from_task_stdin():
     """
     read input from taskwarrior via stdin,
     return list of dictionaries.
@@ -54,32 +54,12 @@ def exclusion_from_command_line():
 
 
 
-def get_udas_from_task_config():
-    """
-    read udas from configuration file.
-    """
-    udas = set()
+tasks = json_from_task_stdin()
 
-    if os.environ.get('TASKRC') is None:
-        config_file = '{0}/.taskrc'.format(os.environ['HOME'])
-    else:
-        config_file = '{0}/.taskrc'.format(os.environ['TASKRC'])
-
-    with open(config_file, 'r') as rc:
-
-        lines = [line for line in rc.readlines() if 'uda' == line[:3]]
-        for line in lines:
-            udas.add(line.split('.')[1])
-
-    return udas
-
-
-tasks = json_from_task_process()
-
-task_data = validate.TaskwarriorExploit(tasks)
+task_data = task_lib.TaskwarriorExploit(tasks)
 
 (nodes_to_be_excluded, edges_to_be_excluded) = exclusion_from_command_line()
-edge_data = edges.connector(task_data, get_udas_from_task_config())
+edge_data = edges.connector(task_data, task_lib.get_udas_from_task_config())
 #p_t_edges = edges.add_indirect_edges(edge_data, 'project', 'tags')
 #p_p_edges = edges.add_indirect_edges(edge_data, 'project', 'people')
 edge_data = edges.filter_network(
