@@ -118,7 +118,7 @@ edge_styles = [
         {
             'color': 'white',
             'style': 'dotted',
-            'penwidth': '8pt',
+            'penwidth': '5pt',
             'arrowsize': '0.1'},
         {
             'color': '#22ff22',
