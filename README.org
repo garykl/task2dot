@@ -26,6 +26,8 @@
    task status:pendung export | python3 task2dot.py
    #+END_SRC
 
+   See a working example: [[example.svg]].
+
 ** what are the nodes, what are the edges
 
    Every task in the taskwarrior export is a node in the dot
