@@ -26,7 +26,7 @@
    task status:pendung export | python3 task2dot.py
    #+END_SRC
 
-   See a working example: [[example.svg]].
+   See a working example: [[example.png]]
 
 ** what are the nodes, what are the edges
 
