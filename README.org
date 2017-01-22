@@ -5,7 +5,7 @@
 
 ** general usage
 
-   On the command line write
+   At the command line write
    #+BEGIN_SRC sh
    task export | python3 task2dot.py | dot -Tsvg > test.svg
    #+END_SRC
@@ -13,10 +13,11 @@
    With this, all todo items that you have ever created are fed into
    =task2dot=. Without any arguments, it just translates the export
    into a format that is suitable for =graphviz= whose output is saved
-   in the file =test.svg=. We can expect this to be insanely messy.
+   in the file =test.svg=. We can expect this to result in an insanely
+   messy network graphics.
 
    For clarity, I will not show the dot command and the output
-   redirection into a file in all the following code snipptes. Note
+   redirection into a file in any the following code snipptes. Note
    that those have to be added for obtaining useful commands.
 
    When exporting data from =taskwarrior= one has to explicitely state
@@ -28,14 +29,16 @@
 ** what are the nodes, what are the edges
 
    Every task in the taskwarrior export is a node in the dot
-   graph. Also projects and tags are nodes. The projects and the tasks
-   are connected and the tasks are connected with its tags. The
+   graph. The text in the task's nodes are its descriptions and all of
+   its annotations, except for the information of items being started
+   or stopped. Also projects and tags are nodes. The projects and the
+   tasks are connected and the tasks are connected with its tags. The
    dependencies between tasks are shown as well.
 
    User defined attributes are supported as well. If the task
    configuration file is =~/.taskrc= or can be found in the environment
-   variable =$TASKRC= then all user defined attributes are shown as node
-   that are connected to its respective tasks. This usually is
+   variable =$TASKRC= then all user defined attributes are shown as
+   nodes that are connected to its respective tasks. This usually is
    overkill, which is why there are two mechanisms to exclude nodes
    and connections from the graph.
 
@@ -43,7 +46,7 @@
 
 *** node exclusion
 
-    Exclude a specific node write
+    To exclude a specific node write
     #+BEGIN_SRC sh
     task status:pending export | python3 task2dot.py -node
     #+END_SRC
@@ -53,11 +56,11 @@
     So why is this useful? If you try to implement /Kanban/ or something
     similar you are very likely to have a certain tag or a user
     defined attribute, like =todo= far too often for having it in a
-    graph visualization. Almost all task are connected to it via
+    graph visualization. Almost all tasks would be connected to it via
     edges, which is useless. Also, if you export taskwarrior data,
     which is filtered with a specific =tag= will cause the resulting
     graph having a lot of connection to that tag. So the following
-    visulation would be useful:
+    visualization would be useful:
     #+BEGIN_SRC sh
     task status:pending +work | python3 task2dot.py -work
     #+END_SRC
@@ -80,7 +83,7 @@
     task export | python3 task2dot.py --path --email
     #+END_SRC
 
-    It is also possible to exclude certain connection also by using
+    It is also possible to exclude certain connections also by using
     double hyphen. Let's get rid of all connections from tasks to
     tags:
     #+BEGIN_SRC sh
@@ -90,13 +93,13 @@
 
 ** more connecgions: over next neighbors
 
-   It is possible to add additional edges than what taskwarrior export
-   directly. One could for example add edges between projects and tags
-   because they are connected by tasks that have both. If one then
-   remove the tasks one can look at a graph that shows us which
+   It is possible to add additional edges than what taskwarrior
+   exports directly. One could for example add edges between projects
+   and tags because they are connected by tasks that have both. If one
+   then removes the tasks one can look at a graph that shows us which
    'actions' are needed for certain projects, if the tags represent
-   'actions'. A command line argument interpretation is to be
-   followed. I suggest
+   'actions'. Similarly to edge exclusion, we use ++node1-node2 to add
+   additional edges.
    #+BEGIN_SRC sh
    task export | python3 task2dot.py ++tags-project --task
    #+END_SRC
