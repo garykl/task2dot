@@ -39,8 +39,8 @@ def json_from_task_stdin():
     read input from taskwarrior via stdin,
     return list of dictionaries.
     """
-    taskwarrioroutput = ','.join(sys.stdin.readlines())
-    return json.loads('[' + taskwarrioroutput + "]")
+    taskwarrioroutput = ''.join(sys.stdin.readlines())
+    return json.loads(taskwarrioroutput)
 
 
 def exclusion_from_command_line():
