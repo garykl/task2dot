@@ -24,7 +24,7 @@ def get_udas_from_task_config():
     if os.environ.get('TASKRC') is None:
         config_file = '{0}/.taskrc'.format(os.environ['HOME'])
     else:
-        config_file = '{0}/.taskrc'.format(os.environ['TASKRC'])
+        config_file = os.environ['TASKRC']
 
     with open(config_file, 'r') as rc:
 
