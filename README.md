@@ -3,11 +3,18 @@
 This program helps with the creation of visualizations of todo
 lists. It works as a simple filter between [taskwarrior](https://github.com/GothenburgBitFactory/taskwarrior) and [graphviz](http://www.graphviz.org/).
 
+The code is now on https://pypi.org and can be installed via
+
+    python3 -m pip install task2dot
+
+if you prefer to work with installed software, compared to interpreted source code.
+Otherwise execution is performed via python3 task2dot/task2dot.py.
+
 ## general usage
 
 At the command line write
 
-    task export | python3 task2dot.py | dot -Tsvg > test.svg
+    task export | task2dot | dot -Tsvg > test.svg
 
 With this, all todo items that you have ever created are fed into
 `task2dot`. Without any arguments, it just translates the export
@@ -22,7 +29,7 @@ that those have to be added for obtaining useful commands.
 When exporting data from `taskwarrior` one has to explicitely state
 that one only wants to export pending tasks:
 
-    task status:pendung export | python3 task2dot.py
+    task status:pendung export | task2dot
 
 See a working example: 
 
@@ -48,7 +55,7 @@ and connections from the graph.
 
 To exclude a specific node write
 
-    task status:pending export | python3 task2dot.py -node
+    task status:pending export | task2dot -node
 
 Then there will be no node with the content 'node' in the output
 graph.
@@ -62,29 +69,29 @@ which is filtered with a specific `tag` will cause the resulting
 graph having a lot of connections to that tag. So the following
 visualization would be useful:
 
-    task status:pending +work | python3 task2dot.py -work
+    task status:pending +work | task2dot -work
 
 ### node type and edge exclusion
 
 A specific type of node can be excluded by using two hyphens. For
 example, not showing any project nodes looks like this:
 
-    task status:pendung export | python3 task2dot.py --project
+    task status:pendung export | task2dot --project
 
 Or not showing any tags:
 
-    task status:pendung export | python3 task2dot.py --tags
+    task status:pendung export | task2dot --tags
 
 In my workflow, paths and emails ids are attached to tasks, so I
 need to write
 
-    task export | python3 task2dot.py --path --email
+    task export | task2dot --path --email
 
 It is also possible to exclude certain connections also by using
 double hyphen. Let's get rid of all connections from tasks to
 tags:
 
-    task export | python3 task2dot.py --task-tags
+    task export | task2dot --task-tags
 
 ## more connections: overnext neighbors
 
@@ -96,4 +103,4 @@ then removes the tasks one can look at a graph that shows us which
 'actions'. Similarly to edge exclusion, we use ++node1-node2 to add
 additional edges.
 
-    task export | python3 task2dot.py ++tags-project --task
+    task export | task2dot ++tags-project --task
