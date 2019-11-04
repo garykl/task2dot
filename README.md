@@ -32,7 +32,7 @@ that one only wants to export pending tasks:
     task status:pendung export | task2dot
 
 See a working example:
-(example.png)
+![example graph from taskwarrior list](example.png)
 
 ## what are the nodes, what are the edges
 
