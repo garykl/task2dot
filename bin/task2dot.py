@@ -54,24 +54,28 @@ def exclusion_from_command_line():
     return (node_exclusion, edge_exclusion, edge_addition)
 
 
+def main():
 
-tasks = json_from_task_stdin()
+    tasks = json_from_task_stdin()
+    
+    task_data = task_lib.TaskwarriorExploit(tasks)
+    
+    (nodes_to_be_excluded, edges_to_be_excluded, edge_addition) = exclusion_from_command_line()
+    edge_data = edges.connector(task_data, task_lib.get_udas_from_task_config())
+    
+    more_edges = set()
+    for e_a in edge_addition:
+        [kind_1, kind_2] = e_a.split('-')
+        more_edges.update(edges.add_indirect_edges(edge_data, kind_1, kind_2))
+    
+    edge_data = edges.filter_network(
+            edge_data, nodes_to_be_excluded, edges_to_be_excluded)
+    
+    edge_data.update(more_edges)
 
-task_data = task_lib.TaskwarriorExploit(tasks)
 
-(nodes_to_be_excluded, edges_to_be_excluded, edge_addition) = exclusion_from_command_line()
-edge_data = edges.connector(task_data, task_lib.get_udas_from_task_config())
-
-more_edges = set()
-for e_a in edge_addition:
-    [kind_1, kind_2] = e_a.split('-')
-    more_edges.update(edges.add_indirect_edges(edge_data, kind_1, kind_2))
-
-edge_data = edges.filter_network(
-        edge_data, nodes_to_be_excluded, edges_to_be_excluded)
-
-edge_data.update(more_edges)
-
+if __name__ == "__main__":
+    main()
 
 
 node_styles = [

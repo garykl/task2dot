@@ -1,2 +1,6 @@
 __pycache__
 *.swp
+build
+dist
+out.svg
+*egg-info
