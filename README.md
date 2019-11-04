@@ -31,7 +31,8 @@ that one only wants to export pending tasks:
 
     task status:pendung export | task2dot
 
-See a working example: 
+See a working example:
+(example.png)
 
 ## what are the nodes, what are the edges
 
