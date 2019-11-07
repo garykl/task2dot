@@ -16,7 +16,7 @@
 # along with dotwarrior.  If not, see <http://www.gnu.org/licenses/>.
 import textwrap
 
-import taskwarrior2net.edges as edges
+import edges as edges
 
 
 def generate_dot_source(

@@ -111,8 +111,14 @@ def connector(collections, udas):
         let's support subprojects.
         """
         res = set()
-        for p1 in collections.projects:
-            for p2 in collections.projects:
+        
+        all_projects = set(collections.projects)
+        for p in collections.projects:
+            if '.' in p:
+                all_projects.add(p.split('.')[0])
+
+        for p1 in all_projects:
+            for p2 in all_projects:
                 cond = p1 in p2 and p1 != p2
                 if cond:
                     res.add(Edge(

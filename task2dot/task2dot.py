@@ -29,9 +29,9 @@ import sys
 import os
 import json
 
-import task2net.task_lib as task_lib
-import task2net.edges as edges
-import task2net.net2dot as net2dot
+import task_lib
+import edges
+import net2dot
 
 
 def json_from_task_stdin():
