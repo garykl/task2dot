@@ -27,11 +27,387 @@
 ################################################################################
 import sys
 import os
+import subprocess
 import json
+import textwrap
 
-import task_lib
-import edges
-import net2dot
+
+
+################################################################################
+##
+##  extracting the base structure of the tasks
+##
+################################################################################
+
+
+class Node:
+
+    def __init__(self, kind, label):
+        self.kind = kind
+        self.label = label
+
+    def __hash__(self):
+        return hash(self.kind + self.label)
+
+    def __repr__(self):
+        return "Node('{0}', '{1}')".format(self.kind, self.label)
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+
+
+class Edge:
+
+    def __init__(self, n_1, n_2):
+        self.node1 = n_1
+        self.node2 = n_2
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+
+    def __hash__(self):
+        return hash(str(self.node1) + str(self.node2))
+
+    def __repr__(self):
+        return "Edge({0}, {1})".format(self.node1, self.node2)
+
+    def kind(self):
+        return self.node1 + '-' + self.node2
+
+
+def connector(collections, udas):
+    """
+    generate data structure containing all data
+    that is necessary for feeding the connections
+    into the dot program.
+
+    udas is a list UDA types. For each uda, check if there is a value in a task
+    and save it as an edge.
+    """
+
+
+
+    def task2uda(task, uda):
+        res = set()
+        if uda in task.keys():
+            for u in task[uda].split(','):
+                res.add(Edge(
+                    Node('task', task['description']),
+                    Node(uda, u)))
+        return res
+
+
+    def task2task(task):
+        res = set()
+        if task['description']:
+            if 'depends' in task:
+                for dep in task['depends'].split(','):
+                    if dep in collections.uuids:
+                        res.add(Edge(
+                            Node('task', collections.task_dict[dep]['description']),
+                            Node('task', task['description'])))
+        return res
+
+
+    def task2tags(task):
+        res = set()
+        if 'tags' in task:
+            for tag in task['tags']:
+                if not task['status'] is 'deleted':
+                    res.add(Edge(
+                        Node('task', task['description']),
+                        Node('tags', tag)))
+        return res
+
+
+    def task2projects(task, excludedTaskStatus):
+        res = set()
+        if task['description']:
+            if 'project' in task.keys():
+                if task['project'] in collections.projects:
+                    if not task['status'] in excludedTaskStatus:
+                        res.add(Edge(
+                            Node('task', task['description']),
+                            Node('project', task['project'])))
+        return res
+
+
+    def project2projects():
+        """
+        let's support subprojects.
+        """
+        res = set()
+        
+        all_projects = set(collections.projects)
+        for p in collections.projects:
+            if '.' in p:
+                all_projects.add(p.split('.')[0])
+
+        for p1 in all_projects:
+            for p2 in all_projects:
+                cond = p1 in p2 and p1 != p2
+                if cond:
+                    res.add(Edge(
+                        Node('project', p2),
+                        Node('project', p1)))
+        return res
+
+
+    res = set()
+    res.update(project2projects())
+
+    for t in collections.tasks:
+
+        res.update(task2task(t))
+        res.update(task2tags(t))
+        res.update(task2uda(t, 'project'))
+
+        for u in udas:
+            res.update(task2uda(t, u))
+
+    return res
+
+
+def filter_nodes(es, nodes):
+    """
+    return edges from es that do not contain nodes from 'nodes'.
+    """
+    res = set()
+    for e in es:
+        if e.node1.label in nodes:
+            continue
+        if e.node2.label in nodes:
+            continue
+        res.add(e)
+    return res
+
+
+def filter_edges(es, edge_types):
+    """
+    return edges from es that are not of a type in edge_types and do not contain
+    any nodes of that type.
+    """
+    res = set()
+    for e in es:
+        if e.node1.kind in edge_types:
+            continue
+        if e.node2.kind in edge_types:
+            continue
+        if e.node1.kind + '-' + e.node2.kind in edge_types:
+            continue
+        res.add(e)
+    return res
+
+
+def filter_network(es, nodes, edge_types):
+    h = filter_nodes(es, nodes)
+    return filter_edges(h, edge_types)
+
+
+def add_indirect_edges(edges, kind_1, kind_2):
+    """
+    If a node has a connection to
+    """
+    res = set()
+
+    import sys
+    for e_1 in edges:
+        for e_2 in edges:
+
+            if e_1.node1.kind == kind_1 and e_2.node1.kind == kind_2:
+                if e_1.node2 == e_2.node2:
+                    res.add(Edge(e_1.node1, e_2.node1))
+            if e_1.node1.kind == kind_1 and e_2.node2.kind == kind_2:
+                if e_1.node2 == e_2.node1:
+                    res.add(Edge(e_1.node1, e_2.node2))
+            if e_1.node2.kind == kind_1 and e_2.node1.kind == kind_2:
+                if e_1.node1 == e_2.node2:
+                    res.add(Edge(e_1.node2, e_2.node1))
+            if e_1.node2.kind == kind_1 and e_2.node2.kind == kind_2:
+                if e_1.node1 == e_2.node1:
+                    res.add(Edge(e_1.node2, e_2.node2))
+
+    return res
+
+
+
+################################################################################
+##
+##  generate dot format from base structure
+##
+################################################################################
+
+
+
+def generate_dot_source(
+        connections, node_conf, edge_conf, graph_conf):
+    """
+    node_conf is a disctionary with keys being a possible type of a node.
+    edge_conf is a dictionary with keys being a possible type of an edge.
+    The values of the dictionaries are dictionaries with settings.
+    edges is a list of Edge instances.
+    """
+
+    header = "digraph  dependencies {"
+
+    for (key, value) in graph_conf.items():
+        header += "{0}=\"{1}\"; ".format(key, value)
+    footer = "}"
+
+
+    def node(n):
+        label = '"' + n.label + '"'
+        label += '[id="activate(\'{0}\', \'{1}\')"]'.format(n.kind, n.label)
+        if n.kind in node_conf:
+            label += "".join(["[{0}=\"{1}\"]".format(k, v) for
+                (k, v) in node_conf[n.kind].items()])
+        else:
+            label += "".join(["[{0}=\"{1}\"]".format(k, v) for
+                (k, v) in node_conf['default'].items()])
+        return label
+
+
+    def edge(e):
+        line = '"{0}" -> "{1}"'.format(
+                e.node1.label,
+                e.node2.label)
+        kind = e.node1.kind + '-' + e.node2.kind
+        if kind in edge_conf:
+            line += "".join(["[{0}=\"{1}\"]".format(k, v) for
+                (k, v) in edge_conf[kind].items()])
+        else:
+            line += "".join(["[{0}=\"{1}\"]".format(k, v) for
+                (k, v) in edge_conf['default'].items()])
+        return line
+
+    res = [header]
+
+    # edges
+    for e in connections:
+        res.append(edge(e))
+        res.append(node(e.node1))
+        res.append(node(e.node2))
+
+    res.append(footer)
+    return "\n".join(res)
+
+
+
+################################################################################
+##
+##  interact with the os environment
+##
+################################################################################
+
+
+
+def json_from_task_process(task_query):
+    """
+    read input from taskwarrior via stdin,
+    return list of dictionaries.
+    """
+    output = subprocess.check_output(task_query.split(' '))
+    tasks = ','.join(str(output, 'utf-8').split('\n')[:-1])
+    return json.loads('[' + tasks + "]")
+
+
+def get_udas_from_task_config():
+    """
+    read udas from configuration file.
+    """
+    udas = set()
+
+    if os.environ.get('TASKRC') is None:
+        config_file = '{0}/.taskrc'.format(os.environ['HOME'])
+    else:
+        config_file = os.environ['TASKRC']
+
+    with open(config_file, 'r') as rc:
+
+        lines = [line for line in rc.readlines() if 'uda' == line[:3]]
+        for line in lines:
+            udas.add(line.split('.')[1])
+
+    return udas
+
+
+def get_uda_values_from_tasks(tasks, uda):
+    res = set()
+    for task in tasks:
+        if uda in task:
+            res.add(task[uda])
+    return res
+
+
+def get_udas_from_task_process():
+    udas = get_udas_from_task_config()
+    tasks = json_from_task_process('task status:pending export')
+    return {u: get_uda_values_from_tasks(tasks, u)
+            for u in udas}
+
+
+def task_with_annotations(task):
+
+    def wrap_text(strng, chars_per_line=25):
+        lines = textwrap.wrap(strng, width=chars_per_line)
+        return "\\n".join(lines)
+
+    res = wrap_text(task['description'], chars_per_line=25) + '\n'
+    if 'annotations' in task:
+        for anno in task['annotations']:
+            res += anno['entry'] +':\n'
+            res += wrap_text(anno['description'], chars_per_line=20) + '\n'
+    return res
+
+
+class TaskwarriorExploit(object):
+
+    def __init__(self, tasks):
+        self.tasks = tasks
+        for t in tasks:
+            t['description'] = task_with_annotations(t)
+        self.projects = self.projects()
+        self.tags = self.tags()
+        self.task_dict = self.uuids()
+        self.uuids = self.task_dict.keys()
+
+
+    def projects(self):
+        res = set()
+        for task in self.tasks:
+            if 'project' in task.keys():
+                res.add(task['project'])
+        return res
+
+    def tags(self):
+        """
+        data is list of dictionaries, containing data from
+        the export function of taskwarrior.
+        return a set with the keys.
+        """
+        allTags = set()
+        for task in self.tasks:
+            if 'tags' in task.keys():
+                for tag in task['tags']:
+                    if tag not in allTags:
+                        allTags.add(tag)
+        return allTags
+
+    def uuids(self):
+        res = {}
+        for task in self.tasks:
+            res[task['uuid']] = task
+        return res
+
+
+
+
+################################################################################
+##
+##  main program
+##
+################################################################################
+
 
 
 def json_from_task_stdin():
