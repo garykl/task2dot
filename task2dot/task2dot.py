@@ -210,7 +210,6 @@ def add_indirect_edges(edges, kind_1, kind_2):
     """
     res = set()
 
-    import sys
     for e_1 in edges:
         for e_2 in edges:
 
@@ -366,20 +365,20 @@ class TaskwarriorExploit(object):
         self.tasks = tasks
         for t in tasks:
             t['description'] = task_with_annotations(t)
-        self.projects = self.projects()
-        self.tags = self.tags()
-        self.task_dict = self.uuids()
+        self.projects = self.get_projects()
+        self.tags = self.get_tags()
+        self.task_dict = self.get_uuids()
         self.uuids = self.task_dict.keys()
 
 
-    def projects(self):
+    def get_projects(self):
         res = set()
         for task in self.tasks:
             if 'project' in task.keys():
                 res.add(task['project'])
         return res
 
-    def tags(self):
+    def get_tags(self):
         """
         data is list of dictionaries, containing data from
         the export function of taskwarrior.
@@ -393,7 +392,7 @@ class TaskwarriorExploit(object):
                         allTags.add(tag)
         return allTags
 
-    def uuids(self):
+    def get_uuids(self):
         res = {}
         for task in self.tasks:
             res[task['uuid']] = task
@@ -434,17 +433,17 @@ def main():
 
     tasks = json_from_task_stdin()
     
-    task_data = task_lib.TaskwarriorExploit(tasks)
+    task_data = TaskwarriorExploit(tasks)
     
     (nodes_to_be_excluded, edges_to_be_excluded, edge_addition) = exclusion_from_command_line()
-    edge_data = edges.connector(task_data, task_lib.get_udas_from_task_config())
+    edge_data = connector(task_data, get_udas_from_task_config())
     
     more_edges = set()
     for e_a in edge_addition:
         [kind_1, kind_2] = e_a.split('-')
-        more_edges.update(edges.add_indirect_edges(edge_data, kind_1, kind_2))
+        more_edges.update(add_indirect_edges(edge_data, kind_1, kind_2))
     
-    edge_data = edges.filter_network(
+    edge_data = filter_network(
             edge_data, nodes_to_be_excluded, edges_to_be_excluded)
     
     edge_data.update(more_edges)
@@ -510,7 +509,7 @@ def main():
             'size': '30,30',
             'bgcolor': '#111519'}
     
-    print(net2dot.generate_dot_source(edge_data,
+    print(generate_dot_source(edge_data,
         {
             'people': node_styles[1],
             'tags': node_styles[0],

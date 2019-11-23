@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="task2dot",
-    version="0.0.8",
+    version="0.0.10",
     author="Gary Klindt",
     author_email="gary.klindt@gmail.com",
     description="convert taskwarrior export to graphviz format and analyse projects",
@@ -20,6 +20,6 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     entry_points = {
-        'console_scripts': ['task2dot=task2dot:main']
+        'console_scripts': ['task2dot=task2dot.task2dot:main']
     }
 )
