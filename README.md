@@ -10,7 +10,7 @@ The code is now on https://pypi.org and can be installed via
 if you prefer to work with installed software, compared to interpreted source code.
 Otherwise execution is performed via python3 task2dot/task2dot.py.
 
-## general usage
+# usage
 
 At the command line write
 
@@ -23,8 +23,8 @@ in the file `test.svg`. We can expect this to result in an insanely
 messy network graphics.
 
 For clarity, I will not show the dot command and the output
-redirection into a file in any the following code snipptes. Note
-that those have to be added for obtaining useful commands.
+redirection into a file in any the following code snippets. Note
+that those have to be added for obtaining useful visualizations.
 
 When exporting data from `taskwarrior` one has to explicitely state
 that one only wants to export pending tasks:
@@ -34,21 +34,18 @@ that one only wants to export pending tasks:
 See a working example:
 ![example graph from taskwarrior list](example.png)
 
-## what are the nodes, what are the edges
+## what are the nodes and edges
 
-Every task in the taskwarrior export is a node in the dot
-graph. The text in the task's nodes are its descriptions and all of
-its annotations, except for the information of items being started
-or stopped. Also projects and tags are nodes. The projects and the
-tasks are connected and the tasks are connected with its tags. The
-dependencies between tasks are shown as well.
+Tasks, tags and projects are nodes as well as user defined attributes!
+User defined attributes are supported if the task configuration file is
+`~/.taskrc` or can be found in the environment variable `$TASKRC`.
 
-User defined attributes are supported as well. If the task
-configuration file is `~/.taskrc` or can be found in the environment
-variable `$TASKRC` then all user defined attributes are shown as
-nodes that are connected to its respective tasks. This usually is
-overkill, which is why there are two mechanisms to exclude nodes
-and connections from the graph.
+Edges are task dependencies and all connections from tasks to their project,
+all of their tags as well as the values of their user defined attributes.
+
+Note that if all node with all of its connections are shown in a graph with
+a sufficiently many tasks, the resulting graph will become overwhelmingly messy.
+Therefore, the following exclusion mechanisms are available.
 
 ## node and edge exclusion
 
@@ -105,3 +102,108 @@ then removes the tasks one can look at a graph that shows us which
 additional edges.
 
     task export | task2dot ++tags-project --task
+
+# colorscheme configuration
+
+To adjust the colors to your needs, you will need to provide a file
+`~/.task2dotrc.json` in your home directory. It contains a json string
+with the following format:
+
+``` json
+{
+    "nodes": {
+        "tags": {
+            "shape": "egg",
+            "fillcolor": "#000000",
+            "penwidth": "2pt",
+            "style": "filled",
+            "fontcolor": "white",
+            "color": "white"
+        },
+        "outcome": {
+            "shape": "egg",
+            "fillcolor": "#000000",
+            "penwidth": "2pt",
+            "style": "filled",
+            "fontcolor": "white",
+            "color": "white"
+        },
+        "people": {
+            "shape": "octagon",
+            "style": "filled",
+            "fillcolor": "#dd9900",
+            "color": "white"
+        },
+        "project": {
+            "shape": "diamond",
+            "penwidth": "2pt",
+            "color": "#22ff22",
+            "fontcolor": "#ffffff",
+            "style": "filled",
+            "fillcolor": "#115500"
+        },
+        "task": {
+            "shape": "box",
+            "color": "white",
+            "fontcolor": "white",
+            "style": "rounded,filled",
+            "fillcolor": "#222299",
+            "fontsize": "16"
+        },
+        "default": {
+            "shape": "box",
+            "color": "white",
+            "fontcolor": "white",
+            "style": "rounded,filled",
+            "fillcolor": "#222299",
+            "fontsize": "16"
+        },
+        "annotation": {
+            "shape": "note",
+            "color": "white",
+            "fontcolor": "white",
+            "style": "filled",
+            "fillcolor": "#111155"
+        },
+        "state": {
+            "shape": "circle",
+            "color": "white",
+            "fontcolor": "white"
+        }
+    },
+    "edges": {
+        "default": {
+            "color": "white"
+        },
+        "task-tags": {
+            "color": "white",
+            "style": "dotted",
+            "penwidth": "5pt",
+            "arrowsize": "0.1"
+        },
+        "project-project": {
+            "color": "#22ff22",
+            "penwidth": "2pt",
+            "arrowhead": "odot",
+            "arrowtail": "odot"
+        },
+        "task-project": {
+            "color": "#aa2211"
+        }
+    },
+    "graph": {
+        "layout": "fdp",
+        "splines": "ortho",
+        "size": "30,30",
+        "bgcolor": "#111519"        
+    }
+}
+```
+
+The parameters that are set in the configuration directly correspond to the
+graphviz (see [graphviz](http://www.graphviz.org/)) settings available for nodes, edges and the graph as a whole. The
+example configuration shown here corresponds to the color scheme used for
+the example graphics referred to from within this README file.
+
+If you want to provide color settings for your own user defined attribute, just
+add a property to the `nodes` property with the name of your attribute and supply the parameters that shall deviate from the `default` configuration.

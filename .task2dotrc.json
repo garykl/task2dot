@@ -1,0 +1,88 @@
+{
+    "nodes": {
+        "tags": {
+            "shape": "egg",
+            "fillcolor": "#000000",
+            "penwidth": "2pt",
+            "style": "filled",
+            "fontcolor": "white",
+            "color": "white"
+        },
+        "outcome": {
+            "shape": "egg",
+            "fillcolor": "#000000",
+            "penwidth": "2pt",
+            "style": "filled",
+            "fontcolor": "white",
+            "color": "white"
+        },
+        "people": {
+            "shape": "octagon",
+            "style": "filled",
+            "fillcolor": "#dd9900",
+            "color": "white"
+        },
+        "project": {
+            "shape": "diamond",
+            "penwidth": "2pt",
+            "color": "#22ff22",
+            "fontcolor": "#ffffff",
+            "style": "filled",
+            "fillcolor": "#115500"
+        },
+        "task": {
+            "shape": "box",
+            "color": "white",
+            "fontcolor": "white",
+            "style": "rounded,filled",
+            "fillcolor": "#222299",
+            "fontsize": "16"
+        },
+        "default": {
+            "shape": "box",
+            "color": "white",
+            "fontcolor": "white",
+            "style": "rounded,filled",
+            "fillcolor": "#222299",
+            "fontsize": "16"
+        },
+        "annotation": {
+            "shape": "note",
+            "color": "white",
+            "fontcolor": "white",
+            "style": "filled",
+            "fillcolor": "#111155"
+        },
+        "state": {
+            "shape": "circle",
+            "color": "white",
+            "fontcolor": "white"
+        }
+    },
+    "edges": {
+        "default": {
+            "color": "white"
+        },
+        "task-tags": {
+            "color": "white",
+            "style": "dotted",
+            "penwidth": "5pt",
+            "arrowsize": "0.1"
+        },
+        "project-project": {
+            "color": "#22ff22",
+            "penwidth": "2pt",
+            "arrowhead": "odot",
+            "arrowtail": "odot"
+        },
+        "task-project": {
+            "color": "#aa2211"
+        }
+    },
+    "graph": {
+        "layout": "fdp",
+        "splines": "ortho",
+        "size": "30,30",
+        "bgcolor": "#111519"        
+    }
+}   

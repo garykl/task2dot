@@ -400,6 +400,99 @@ class TaskwarriorExploit(object):
 
 
 
+def read_visual_config():
+    """
+    read configuration file .task2dotrc.json in the home directory that
+    contains configuration for the visual appearence of the resulting graph
+    """
+    config_file = '{0}/.task2dotrc.json'.format(os.environ['HOME'])
+    if os.path.isfile(config_file):
+        with open(config_file, 'r') as handle:
+            return json.load(handle)
+    
+    node_styles = [
+        {
+            'shape': 'egg',
+            'fillcolor': '#000000',
+            'penwidth': '2pt',
+            'style': 'filled',
+            'fontcolor': 'white',
+            'color': 'white'},
+        {
+            'shape': 'octagon',
+            'style': 'filled',
+            'fillcolor': '#dd9900',
+            'color': 'white'},
+        {
+            'shape': 'diamond',
+            'penwidth': '2pt',
+            'color': '#22ff22',
+            'fontcolor': '#ffffff',
+            'style': 'filled',
+            'fillcolor': '#115500'},
+        {
+            'shape': 'box',
+            'color': 'white',
+            'fontcolor': 'white',
+            'style': 'rounded,filled',
+            'fillcolor': '#222299',
+            'fontsize': '16'},
+        {
+            'shape': 'note',
+            'color': 'white',
+            'fontcolor': 'white',
+            'style': 'filled',
+            'fillcolor': '#111155'},
+        {
+            'shape': 'circle',
+            'color': 'white',
+            'fontcolor': 'white'}]
+    
+    edge_styles = [
+        {
+            'color': 'white'},
+        {
+            'color': 'white',
+            'style': 'dotted',
+            'penwidth': '5pt',
+            'arrowsize': '0.1'},
+        {
+            'color': '#22ff22',
+            'penwidth': '2pt',
+            'arrowhead': 'odot',
+            'arrowtail': 'odot'},
+        {
+            'color': '#aa2211'}]
+    
+    graph_styles = {
+        'layout': 'fdp',
+        'splines': 'ortho',
+        'size': '30,30',
+        'bgcolor': '#111519'
+    }
+    
+    return {
+        "nodes": {
+            'people': node_styles[1],
+            'tags': node_styles[0],
+            'outcome': node_styles[0],
+            'project': node_styles[2],
+            'task': node_styles[3],
+            'annotation': node_styles[4],
+            'state': node_styles[5],
+            'default': node_styles[3]
+        },
+        "edges": {
+            'default': edge_styles[0],
+            'task-tags': edge_styles[1],
+            'project-project': edge_styles[2],
+            'task-project': edge_styles[3]
+        },
+        "graph": graph_styles
+    }
+
+
+
 
 ################################################################################
 ##
@@ -429,6 +522,7 @@ def exclusion_from_command_line():
     return (node_exclusion, edge_exclusion, edge_addition)
 
 
+
 def main():
 
     tasks = json_from_task_stdin()
@@ -448,83 +542,13 @@ def main():
     
     edge_data.update(more_edges)
 
-
-    node_styles = [
-            {
-                'shape': 'egg',
-                'fillcolor': '#000000',
-                'penwidth': '2pt',
-                'style': 'filled',
-                'fontcolor': 'white',
-                'color': 'white'},
-            {
-                'shape': 'octagon',
-                'style': 'filled',
-                'fillcolor': '#dd9900',
-                'color': 'white'},
-            {
-                'shape': 'diamond',
-                'penwidth': '2pt',
-                'color': '#22ff22',
-                'fontcolor': '#ffffff',
-                'style': 'filled',
-                'fillcolor': '#115500'},
-            {
-                'shape': 'box',
-                'color': 'white',
-                'fontcolor': 'white',
-                'style': 'rounded,filled',
-                'fillcolor': '#222299',
-                'fontsize': '16'},
-            {
-                'shape': 'note',
-                'color': 'white',
-                'fontcolor': 'white',
-                'style': 'filled',
-                'fillcolor': '#111155'},
-            {
-                'shape': 'circle',
-                'color': 'white',
-                'fontcolor': 'white'}]
+    visual_config = read_visual_config()
     
-    edge_styles = [
-            {
-                'color': 'white'},
-            {
-                'color': 'white',
-                'style': 'dotted',
-                'penwidth': '5pt',
-                'arrowsize': '0.1'},
-            {
-                'color': '#22ff22',
-                'penwidth': '2pt',
-                'arrowhead': 'odot',
-                'arrowtail': 'odot'},
-            {
-                'color': '#aa2211'}]
-    
-    graph_styles = {
-            'layout': 'fdp',
-            'splines': 'ortho',
-            'size': '30,30',
-            'bgcolor': '#111519'}
-    
-    print(generate_dot_source(edge_data,
-        {
-            'people': node_styles[1],
-            'tags': node_styles[0],
-            'outcome': node_styles[0],
-            'project': node_styles[2],
-            'task': node_styles[3],
-            'annotation': node_styles[4],
-            'state': node_styles[5],
-            'default': node_styles[3]},
-        {
-            'default': edge_styles[0],
-            'task-tags': edge_styles[1],
-            'project-project': edge_styles[2],
-            'task-project': edge_styles[3]}, graph_styles))
-
+    print(generate_dot_source(
+        edge_data,
+        visual_config["nodes"],
+        visual_config["edges"],
+        visual_config["graph"]))
 
 if __name__ == "__main__":
     main()
