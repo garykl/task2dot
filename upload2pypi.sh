@@ -1,8 +1,6 @@
 #!/bin/bash
 
 rm -rf task2dot.egg-info
-rm -rf task2dot_garykl.egg-info
-rm -rf 'exec'
 rm -rf dist
 rm -rf build
 
