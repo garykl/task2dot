@@ -101,7 +101,13 @@ def connector(collections, udas):
         res = set()
         if task['description']:
             if 'depends' in task:
-                for dep in task['depends'].split(','):
+
+                dependencies = task['depends']
+                if type(dependencies) is not list:
+                    dependencies = dependencies.split(',')
+
+                for dep in dependencies:
+                    
                     if dep in collections.uuids:
                         res.add(Edge(
                             Node('task', collections.task_dict[dep]['description']),
@@ -247,7 +253,7 @@ def generate_dot_source(
     edges is a list of Edge instances.
     """
 
-    header = "digraph  dependencies {"
+    header = "digraph dependencies {"
 
     for (key, value) in graph_conf.items():
         header += "{0}=\"{1}\"; ".format(key, value)
@@ -544,11 +550,12 @@ def main():
 
     visual_config = read_visual_config()
     
-    print(generate_dot_source(
-        edge_data,
-        visual_config["nodes"],
-        visual_config["edges"],
-        visual_config["graph"]))
+    print(
+        generate_dot_source(
+            edge_data,
+            visual_config["nodes"],
+            visual_config["edges"],
+            visual_config["graph"]))
 
 if __name__ == "__main__":
     main()
