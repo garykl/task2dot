@@ -22,7 +22,7 @@
 # - Command line arguments are read.
 #    - All arguments with a leading '-' lead to the exclusion of the specific
 #      node.
-#    - All arument with a leading '--' lead to the exclusion of that node type
+#    - All arguments with a leading '--' lead to the exclusion of that node type
 #
 ################################################################################
 import sys
@@ -44,7 +44,7 @@ class Node:
 
     def __init__(self, kind, label):
         self.kind = kind
-        self.label = label
+        self.label = label.replace('"', '\\"')
 
     def __hash__(self):
         return hash(self.kind + self.label)
@@ -119,7 +119,7 @@ def connector(collections, udas):
         res = set()
         if 'tags' in task:
             for tag in task['tags']:
-                if not task['status'] is 'deleted':
+                if task['status'] != 'deleted':
                     res.add(Edge(
                         Node('task', task['description']),
                         Node('tags', tag)))
@@ -247,7 +247,7 @@ def add_indirect_edges(edges, kind_1, kind_2):
 def generate_dot_source(
         connections, node_conf, edge_conf, graph_conf):
     """
-    node_conf is a disctionary with keys being a possible type of a node.
+    node_conf is a dictionary with keys being a possible type of a node.
     edge_conf is a dictionary with keys being a possible type of an edge.
     The values of the dictionaries are dictionaries with settings.
     edges is a list of Edge instances.
