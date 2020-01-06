@@ -44,7 +44,7 @@ class Node:
 
     def __init__(self, kind, label):
         self.kind = kind
-        self.label = label
+        self.label = label.replace('"', '\\"')
 
     def __hash__(self):
         return hash(self.kind + self.label)
