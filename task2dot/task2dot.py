@@ -119,7 +119,7 @@ def connector(collections, udas):
         res = set()
         if 'tags' in task:
             for tag in task['tags']:
-                if not task['status'] is 'deleted':
+                if task['status'] != 'deleted':
                     res.add(Edge(
                         Node('task', task['description']),
                         Node('tags', tag)))
