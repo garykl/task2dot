@@ -29,7 +29,7 @@ that those have to be added for obtaining useful visualizations.
 When exporting data from `taskwarrior` one has to explicitely state
 that one only wants to export pending tasks:
 
-    task status:pendung export | task2dot
+    task status:pending export | task2dot
 
 See a working example:
 ![example graph from taskwarrior list](example.png)
@@ -74,11 +74,11 @@ visualization would be useful:
 A specific type of node can be excluded by using two hyphens. For
 example, not showing any project nodes looks like this:
 
-    task status:pendung export | task2dot --project
+    task status:pending export | task2dot --project
 
 Or not showing any tags:
 
-    task status:pendung export | task2dot --tags
+    task status:pending export | task2dot --tags
 
 In my workflow, paths and emails ids are attached to tasks, so I
 need to write
