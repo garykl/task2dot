@@ -22,7 +22,7 @@
 # - Command line arguments are read.
 #    - All arguments with a leading '-' lead to the exclusion of the specific
 #      node.
-#    - All arument with a leading '--' lead to the exclusion of that node type
+#    - All arguments with a leading '--' lead to the exclusion of that node type
 #
 ################################################################################
 import sys
@@ -247,7 +247,7 @@ def add_indirect_edges(edges, kind_1, kind_2):
 def generate_dot_source(
         connections, node_conf, edge_conf, graph_conf):
     """
-    node_conf is a disctionary with keys being a possible type of a node.
+    node_conf is a dictionary with keys being a possible type of a node.
     edge_conf is a dictionary with keys being a possible type of an edge.
     The values of the dictionaries are dictionaries with settings.
     edges is a list of Edge instances.
