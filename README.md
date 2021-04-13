@@ -85,6 +85,10 @@ need to write
 
     task export | task2dot --path --email
 
+When converting tasks with annotations to a graph, by default the
+annotations are concatenated and added to the task description. To
+turn of annotations altogether, you can use `task2dot --annotation`.
+
 It is also possible to exclude certain connections also by using
 double hyphen. Let's get rid of all connections from tasks to
 tags:

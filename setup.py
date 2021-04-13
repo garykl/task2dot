@@ -5,10 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="task2dot",
-    version="0.0.14",
+    version="0.0.15",
     author="Gary Klindt",
     author_email="gary.klindt@gmail.com",
-    description="convert taskwarrior export to graphviz format and analyse projects",
+    description="Convert taskwarrior export to graphviz format and analyse projects",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/garykl/task2dot",

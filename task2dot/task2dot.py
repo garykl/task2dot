@@ -367,10 +367,11 @@ def task_with_annotations(task):
 
 class TaskwarriorExploit(object):
 
-    def __init__(self, tasks):
+    def __init__(self, tasks, suppress_annotations=False):
         self.tasks = tasks
-        for t in tasks:
-            t['description'] = task_with_annotations(t)
+        if not suppress_annotations:
+            for t in tasks:
+                t['description'] = task_with_annotations(t)
         self.projects = self.get_projects()
         self.tags = self.get_tags()
         self.task_dict = self.get_uuids()
@@ -530,12 +531,11 @@ def exclusion_from_command_line():
 
 
 def main():
-
-    tasks = json_from_task_stdin()
-    
-    task_data = TaskwarriorExploit(tasks)
     
     (nodes_to_be_excluded, edges_to_be_excluded, edge_addition) = exclusion_from_command_line()
+
+    tasks = json_from_task_stdin()
+    task_data = TaskwarriorExploit(tasks, 'annotation' in edges_to_be_excluded)
     edge_data = connector(task_data, get_udas_from_task_config())
     
     more_edges = set()
